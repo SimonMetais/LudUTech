@@ -1,0 +1,63 @@
+﻿uv : Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Au caractère Ligne:1 : 1
++ uv run python manage.py test core --verbosity 2 2>&1 | Out-File -File ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Creating test d...che=shared')...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Found 19 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: messages, staticfiles
+  Apply all migrations: admin, auth, contenttypes, core, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying core.0001_initial... OK
+test_oeuvre_details_display (core.tests.test_admin.LentAdminTest.test_oeuvre_details_display) ... ok
+test_game_save_strips_fields (core.tests.test_models.GameModelTest.test_game_save_strips_fields) ... ok
+test_game_slug_generation (core.tests.test_models.GameModelTest.test_game_slug_generation) ... ok
+test_game_str (core.tests.test_models.GameModelTest.test_game_str) ... ok
+test_lent_validation_date_order (core.tests.test_models.LentModelTest.test_lent_validation_date_order) ... ok
+test_lent_validation_max_duration (core.tests.test_models.LentModelTest.test_lent_validation_max_duration) ... ok
+test_lent_validation_weekend_in (core.tests.test_models.LentModelTest.test_lent_validation_weekend_in) ... ok
+test_lent_validation_weekend_out (core.tests.test_models.LentModelTest.test_lent_validation_weekend_out) ... ok
+test_valid_lent (core.tests.test_models.LentModelTest.test_valid_lent) ... ok
+test_game_list_ordering (core.tests.test_ordering.GameOrderingTest.test_game_list_ordering) ... ok
+test_game_detail_view (core.tests.test_views.GameViewsTest.test_game_detail_view) ... ok
+test_game_list_ordering_by_popularity (core.tests.test_views.GameViewsTest.test_game_list_ordering_by_popularity) ... 
+ok
+test_game_list_play_mode_filter (core.tests.test_views.GameViewsTest.test_game_list_play_mode_filter) ... ok
+test_game_list_view (core.tests.test_views.GameViewsTest.test_game_list_view) ... ok
+test_reservation_list_view (core.tests.test_views.GameViewsTest.test_reservation_list_view) ... ok
+test_reserve_game_overlap (core.tests.test_views.GameViewsTest.test_reserve_game_overlap) ... ok
+test_reserve_game_post_success (core.tests.test_views.GameViewsTest.test_reserve_game_post_success) ... ok
+test_reserve_game_too_long (core.tests.test_views.GameViewsTest.test_reserve_game_too_long) ... ok
+test_reserve_game_weekend (core.tests.test_views.GameViewsTest.test_reserve_game_weekend) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.070s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).

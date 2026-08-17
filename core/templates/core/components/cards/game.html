@@ -1,0 +1,43 @@
+<div class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col h-full">
+    <div class="h-48 bg-gray-50 overflow-hidden relative">
+        {% if object.cover_image %}
+            <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="w-full h-full object-contain">
+        {% else %}
+            <div class="flex items-center justify-center h-full text-gray-400">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+        {% endif %}
+        <span class="absolute top-2 right-2 px-2 py-1 text-xs font-semibold rounded {% if object.space == 'INDOOR' %}bg-blue-100/90 text-blue-800{% else %}bg-green-100/90 text-green-800{% endif %}">
+            {{ object.get_space_display }}
+        </span>
+    </div>
+    <div class="p-6 flex flex-col flex-grow">
+        <div class="flex items-center gap-2 mb-2">
+            <h3 class="text-xl font-bold text-gray-900 leading-tight truncate" title="{{ object.title }}">{{ object.title }}</h3>
+        </div>
+        
+        <div class="flex flex-wrap gap-1 mb-4 h-12 overflow-hidden content-start">
+            {% for type in object.game_types.all %}
+            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">{{ type.name }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="flex items-center text-sm text-gray-600 mb-6 space-x-4 mt-auto">
+            <span title="Nombre de joueurs">👥 {{ object.players_min }}-{{ object.players_max }}</span>
+            <span title="Âge minimum">🎂 {{ object.min_age }}+</span>
+            <span title="Difficulté">⭐ {{ object.get_difficulty_display }}</span>
+        </div>
+        
+        <div class="flex flex-wrap gap-1 mb-4">
+            {% for mode in object.play_modes.all %}
+                <span class="text-indigo-600 font-semibold text-xs">{{ mode }}</span>
+            {% endfor %}
+        </div>
+
+        <a href="{{ object.get_absolute_url }}" class="block w-full text-center bg-gray-900 text-white px-4 py-2 rounded hover:bg-black transition text-sm font-semibold">
+            Voir plus / Réserver
+        </a>
+    </div>
+</div>

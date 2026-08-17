@@ -1,0 +1,44 @@
+<div>
+    <label class="block text-sm font-medium text-gray-700">Type</label>
+    <select name="type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+        <option value="">Tous</option>
+        {% for type in game_types %}
+        <option value="{{ type.id }}" {% if request.GET.type == type.id|stringformat:"i" %}selected{% endif %}>{{ type.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div>
+    <label class="block text-sm font-medium text-gray-700">Difficulté</label>
+    <select name="difficulty" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+        <option value="">Toutes</option>
+        {% for val, label in difficulty_choices %}
+        <option value="{{ val }}" {% if request.GET.difficulty == val|stringformat:"i" %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div>
+    <label class="block text-sm font-medium text-gray-700">Espace</label>
+    <select name="space" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+        <option value="">Tous</option>
+        {% for val, label in space_choices %}
+        <option value="{{ val }}" {% if request.GET.space == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div>
+    <label class="block text-sm font-medium text-gray-700">Nombre de joueurs</label>
+    <input type="number" name="players" value="{{ request.GET.players }}" min="1" placeholder="Ex: 3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+</div>
+
+<div>
+    <label class="block text-sm font-medium text-gray-700">Mode de jeu</label>
+    <select name="play_mode" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+        <option value="">Tous</option>
+        {% for mode in play_modes %}
+        <option value="{{ mode.id }}" {% if request.GET.play_mode == mode.id|stringformat:"i" %}selected{% endif %}>{{ mode.name }}</option>
+        {% endfor %}
+    </select>
+</div>

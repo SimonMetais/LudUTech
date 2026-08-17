@@ -1,0 +1,65 @@
+<div class="grid grid-cols-2 gap-4 text-sm mb-6">
+    <div class="bg-gray-50 p-3 rounded-lg">
+        <span class="block text-gray-500 text-xs uppercase font-semibold mb-1">Âge</span>
+        <span class="text-gray-900 font-bold">{{ object.min_age }}+</span>
+    </div>
+    <div class="bg-gray-50 p-3 rounded-lg">
+        <span class="block text-gray-500 text-xs uppercase font-semibold mb-1">Joueurs</span>
+        <span class="text-gray-900 font-bold">{{ object.players_min }} - {{ object.players_max }}</span>
+    </div>
+    <div class="bg-gray-50 p-3 rounded-lg">
+        <span class="block text-gray-500 text-xs uppercase font-semibold mb-1">Difficulté</span>
+        <span class="text-gray-900 font-bold">{{ object.get_difficulty_display }}</span>
+    </div>
+    <div class="bg-gray-50 p-3 rounded-lg">
+        <span class="block text-gray-500 text-xs uppercase font-semibold mb-1">Espace</span>
+        <span class="text-gray-900 font-bold">{{ object.get_space_display }}</span>
+    </div>
+</div>
+
+<div class="mb-6">
+    <h3 class="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wider">Modes de jeu</h3>
+    <div class="flex flex-wrap gap-2">
+        {% for mode in object.play_modes.all %}
+            <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium border border-indigo-100">{{ mode }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+{% if object.box_content_items %}
+        <details class="mb-6 group">
+            <summary class="cursor-pointer list-none flex items-center gap-2 text-sm font-semibold text-gray-900 uppercase tracking-wider select-none">
+                <svg class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                Contenu de la boîte
+            </summary>
+            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1 mt-2 pl-6">
+                {% for item in object.box_content_items %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </details>
+    {% endif %}
+
+{% if object.video_youtube_id %}
+    <details class="mt-6 group">
+        <summary class="cursor-pointer list-none flex items-center gap-2 text-sm font-semibold text-gray-900 uppercase tracking-wider select-none">
+            <svg class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+            Règles en vidéo
+        </summary>
+        <div class="mt-4 aspect-video w-full rounded-xl overflow-hidden border-4 border-gray-100 shadow-inner bg-black">
+            <iframe 
+                class="w-full h-full"
+                src="{{ object.video_rules_embed_url }}" 
+                title="Vidéo des règles" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </details>
+{% endif %}

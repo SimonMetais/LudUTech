@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% load filter_tags %}
+
+{% block title %}Liste des {{ model_meta.verbose_name_plural.lower }} - JDSU{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row gap-8">
+    <!-- Sidebar Filtres -->
+    <aside class="w-full md:w-64 space-y-6">
+        <div class="bg-white p-6 rounded-lg shadow-sm border">
+            <h2 class="text-lg font-semibold mb-4">Filtres</h2>
+            <form method="get" class="space-y-4">
+                {% include 'core/components/filters/oeuvre.html' %}
+                {% render_filter %}
+                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition font-medium">
+                    Filtrer
+                </button>
+                <a href="{% url 'oeuvre_list' model_name %}" class="block text-center text-sm text-gray-500 hover:text-indigo-600">Réinitialiser</a>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Grille des objets -->
+    <div class="flex-grow">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for obj in objects %}
+                <div class="h-full rounded-lg" style="{% if site_mode and obj.cabinet_color %}border: 4px solid {{ obj.cabinet_color.color }};{% endif %}">
+                    {{ obj.render_card|safe }}
+                </div>
+            {% empty %}
+            <div class="col-span-full py-12 text-center">
+                <p class="text-gray-500 text-lg">Aucun élément ne correspond à vos critères.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
