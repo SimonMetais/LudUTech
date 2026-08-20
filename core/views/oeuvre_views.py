@@ -1,12 +1,18 @@
+from datetime import timedelta
+
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+
 from ..models import Oeuvre
 
 def home(request):
-    latest_oeuvres = Oeuvre.objects.order_by('-entry_date')[:3]
+    latest_oeuvres = Oeuvre.objects.filter(
+        entry_date__gte=timezone.now().date() - timedelta(days=30)
+    ).order_by('-entry_date')
     return render(request, 'core/home.html', {
         'latest_oeuvres': latest_oeuvres,
-        'welcome_message': "Bienvenue sur JDSU, votre ludothèque préférée !"
+        'welcome_message': "Bienvenue sur votre ludothèque préférée !"
     })
 
 

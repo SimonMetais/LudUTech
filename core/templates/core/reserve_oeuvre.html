@@ -22,7 +22,7 @@
         <div class="p-8">
             <h1 class="text-2xl font-bold text-gray-900 mb-6">Réserver {{ oeuvre.type_name|lower }} : {{ oeuvre.title }}</h1>
             {% if already_lents %}
-                <blockquote class="border-l-4 border-red-600 bg-red-50 px-4 py-3 mb-6">
+                <blockquote class="border-l-4 border-yellow-600 bg-yellow-50 px-4 py-3 mb-6">
                     <h2 class="text-lg font-bold text-gray-900 mb-2">Réservation{{ already_lents|pluralize }} déjà effectuée{{ already_lents|pluralize }} :</h2>
                     {% for lent in already_lents %}
                         <p class="text-sm text-gray-800">Du {{ lent.date_in }} au {{ lent.date_out }}</p>
