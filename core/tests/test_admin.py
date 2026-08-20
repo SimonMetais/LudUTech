@@ -1,12 +1,16 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth import get_user_model
 from core.models import Game, Lent, Oeuvre
 from core.admin import LentAdmin
 import datetime
 
+User = get_user_model()
+
 class LentAdminTest(TestCase):
     def setUp(self):
         self.site = AdminSite()
+        self.user = User.objects.create_user(username="testuser", first_name="Test", last_name="User")
         self.game = Game.objects.create(
             title="Weight Test Game",
             difficulty=Game.DifficultyChoice.EASY,
@@ -14,9 +18,9 @@ class LentAdminTest(TestCase):
         )
         self.lent = Lent.objects.create(
             oeuvre=self.game,
-            borrower="Test User",
-            date_in=datetime.date(2026, 8, 10),
-            date_out=datetime.date(2026, 8, 14)
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 8, 27)
         )
         self.admin = LentAdmin(Lent, self.site)
 

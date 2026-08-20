@@ -1,7 +1,10 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 from core.models import Game, GameType, Lent, Oeuvre, CabinetColor
 import datetime
+
+User = get_user_model()
 
 class GameModelTest(TestCase):
     def setUp(self):
@@ -38,6 +41,7 @@ class GameModelTest(TestCase):
 
 class LentModelTest(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(username="johndoe", first_name="John", last_name="Doe")
         self.game = Game.objects.create(
             title="Lent Test Game",
             difficulty=Game.DifficultyChoice.EASY,
@@ -48,9 +52,9 @@ class LentModelTest(TestCase):
         # date_in > date_out
         lent = Lent(
             oeuvre=self.game,
-            borrower="John",
-            date_in=datetime.date(2026, 8, 10),
-            date_out=datetime.date(2026, 8, 5)
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25), # Mardi
+            date_out=datetime.date(2026, 8, 20)  # Jeudi précédent
         )
         with self.assertRaises(ValidationError):
             lent.full_clean()
@@ -59,45 +63,42 @@ class LentModelTest(TestCase):
         # > 15 jours (ex: 16 jours)
         lent = Lent(
             oeuvre=self.game,
-            borrower="John",
-            date_in=datetime.date(2026, 8, 3), # Lundi
-            date_out=datetime.date(2026, 8, 19) # Mercredi (+16j)
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),  # Mardi
+            date_out=datetime.date(2026, 9, 10) # Jeudi (+16j)
         )
         with self.assertRaises(ValidationError):
             lent.full_clean()
 
-    def test_lent_validation_weekend_in(self):
-        # Samedi 8 Août 2026
+    def test_lent_validation_astreinte_days(self):
+        # Vendredi 28 Août 2026 (pas mardi ou jeudi)
         lent = Lent(
             oeuvre=self.game,
-            borrower="John",
-            date_in=datetime.date(2026, 8, 8),
-            date_out=datetime.date(2026, 8, 12)
-        )
-        with self.assertRaises(ValidationError):
-            lent.full_clean()
-
-    def test_lent_validation_weekend_out(self):
-        # Dimanche 9 Août 2026
-        lent = Lent(
-            oeuvre=self.game,
-            borrower="John",
-            date_in=datetime.date(2026, 8, 5),
-            date_out=datetime.date(2026, 8, 9)
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 28),
+            date_out=datetime.date(2026, 9, 1)
         )
         with self.assertRaises(ValidationError):
             lent.full_clean()
 
     def test_valid_lent(self):
-        # Lundi 10 au Vendredi 14
+        # Mardi 25 au Jeudi 27
         lent = Lent(
             oeuvre=self.game,
-            borrower="John",
-            date_in=datetime.date(2026, 8, 10),
-            date_out=datetime.date(2026, 8, 14)
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 8, 27)
         )
         try:
             lent.full_clean()
             lent.save()
         except ValidationError:
             self.fail("ValidationError raised on valid lent")
+
+    def test_lent_clean_missing_dates(self):
+        # Ne doit pas lever TypeError si une ou les deux dates sont None
+        lent = Lent(oeuvre=self.game, borrower=self.user, date_in=None, date_out=None)
+        try:
+            lent.clean()
+        except TypeError:
+            self.fail("Lent.clean() raised TypeError with missing dates")

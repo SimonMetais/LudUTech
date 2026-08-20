@@ -73,8 +73,8 @@ class Oeuvre(models.Model):
         return getattr(self, self.content_type.model)
 
     @property
-    def verbose_name(self):
-        return self.downcast._meta.verbose_name
+    def type_name(self):
+        return self.content_type.name
 
     def render_card(self):
         templates = [

@@ -11,7 +11,7 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <nav class="flex mb-8 text-sm text-gray-500">
-        <a href="{% url 'oeuvre_list' model_name=model_name %}" class="hover:text-indigo-600">{{ oeuvre.verbose_name }}s</a>
+        <a href="{% url 'oeuvre_list' model_name=model_name %}" class="hover:text-indigo-600">{{ oeuvre.type_name }}s</a>
         <span class="mx-2">/</span>
         <a href="{{ oeuvre.get_absolute_url }}" class="hover:text-indigo-600">{{ oeuvre.title }}</a>
         <span class="mx-2">/</span>
@@ -20,11 +20,19 @@
 
     <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
         <div class="p-8">
-            <h1 class="text-2xl font-bold text-gray-900 mb-6">Réserver {{ oeuvre.verbose_name|lower }} : {{ oeuvre.title }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Réserver {{ oeuvre.type_name|lower }} : {{ oeuvre.title }}</h1>
+            {% if already_lents %}
+                <blockquote class="border-l-4 border-red-600 bg-red-50 px-4 py-3 mb-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">Réservation{{ already_lents|pluralize }} déjà effectuée{{ already_lents|pluralize }} :</h2>
+                    {% for lent in already_lents %}
+                        <p class="text-sm text-gray-800">Du {{ lent.date_in }} au {{ lent.date_out }}</p>
+                    {% endfor %}
+                </blockquote>
+            {% endif %}
             
             <form method="post" class="space-y-6">
                 {% csrf_token %}
-                
+
                 {% if form.errors %}
                 <div class="bg-red-50 border-l-4 border-red-400 p-4">
                     <div class="flex">
@@ -49,16 +57,9 @@
                 </div>
                 {% endif %}
 
-                <div>
-                    <label for="borrower" class="block text-sm font-medium text-gray-700 mb-1">Votre prénom et nom (pour la réservation)</label>
-                    <input type="text" name="borrower" id="borrower" required placeholder="Ex: Jean Dupont"
-                        value="{{ form.borrower.value|default:'' }}"
-                        class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 border">
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="date_in" class="block text-sm font-medium text-gray-700 mb-1">Date d'emprunt'</label>
+                        <label for="date_in" class="block text-sm font-medium text-gray-700 mb-1">Date d'emprunt</label>
                         <input type="date" name="date_in" id="date_in" required
                             value="{{ form.date_in.value|default:'' }}"
                             class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 border">
@@ -72,7 +73,7 @@
                 </div>
 
                 <div class="pt-4">
-                    <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100">
+                    <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:bg-gray-400 disabled:shadow-none" disabled>
                         Confirmer la réservation
                     </button>
                     <p class="text-center text-xs text-gray-500 mt-4">
@@ -88,6 +89,14 @@
     document.addEventListener('DOMContentLoaded', function() {
         const dateIn = document.getElementById('date_in');
         const dateOut = document.getElementById('date_out');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function updateSubmitButton() {
+            if (submitBtn) {
+                const hasBothDates = Boolean(dateIn && dateIn.value && dateIn.value.trim() !== '' && dateOut && dateOut.value && dateOut.value.trim() !== '');
+                submitBtn.disabled = !hasBothDates;
+            }
+        }
 
         // Récupérer les dates déjà réservées
         const existingLents = [
@@ -123,6 +132,7 @@
             minDate: "today",
             onChange: function(selectedDates, dateStr, instance) {
                 fpOut.set('minDate', dateStr);
+                updateSubmitButton();
             }
         });
 
@@ -135,8 +145,16 @@
             minDate: "today",
             onChange: function(selectedDates, dateStr, instance) {
                 fpIn.set('maxDate', dateStr);
+                updateSubmitButton();
             }
         });
+
+        dateIn.addEventListener('input', updateSubmitButton);
+        dateIn.addEventListener('change', updateSubmitButton);
+        dateOut.addEventListener('input', updateSubmitButton);
+        dateOut.addEventListener('change', updateSubmitButton);
+
+        updateSubmitButton();
     });
 </script>
 {% endblock %}

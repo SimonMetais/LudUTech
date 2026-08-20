@@ -116,12 +116,15 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
+LOGIN_URL = '/accounts/google/login/'
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+SOCIALACCOUNT_LOGIN_ON_GET = True  # La politique SameSite=Lax et le paramètre cryptographique state Google OAuth
+# sont suffisants au regard de la logique metier de ce site
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_ADAPTER = 'core.auth_adapter.DomainRestrictedSocialAccountAdapter'
+# SOCIALACCOUNT_ADAPTER = 'core.auth_adapter.DomainRestrictedSocialAccountAdapter'  # Pas besoin si Google OAuth Internal
 
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar']

@@ -6,6 +6,7 @@ def get_site_mode():
     return getattr(_thread_locals, 'site_mode', False)
 
 class SiteModeMiddleware:
+    """ Injection du site_mode dans le thread local, pour l'injecter dans les QS """
     def __init__(self, get_response):
         self.get_response = get_response
 

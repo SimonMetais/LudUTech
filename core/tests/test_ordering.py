@@ -1,12 +1,16 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 from core.models import Game, Lent
 from django.utils import timezone
 import datetime
 from datetime import timedelta
 
+User = get_user_model()
+
 class GameOrderingTest(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(username="orderuser", first_name="Order", last_name="User")
         # Création de 3 jeux
         self.game_popular = Game.objects.create(title="Jeu Populaire", difficulty=1, weight_grams=100)
         self.game_medium = Game.objects.create(title="Jeu Moyen", difficulty=1, weight_grams=100)
@@ -23,25 +27,28 @@ class GameOrderingTest(TestCase):
         for i in range(3):
             Lent.objects.create(
                 oeuvre=self.game_popular,
-                borrower=f"UserP{i}",
+                borrower=self.user,
                 date_in=now - timedelta(days=7*(i+1)),
-                date_out=now - timedelta(days=7*(i+1)-2)
+                date_out=now - timedelta(days=7*(i+1)-2),
+                returned=True
             )
             
         # Emprunts pour le jeu moyen (1 emprunt récent)
         Lent.objects.create(
             oeuvre=self.game_medium,
-            borrower="UserM",
+            borrower=self.user,
             date_in=now - timedelta(days=21), # Mardi
-            date_out=now - timedelta(days=19) # Jeudi
+            date_out=now - timedelta(days=19), # Jeudi
+            returned=True
         )
         
         # Emprunt ancien pour le jeu impopulaire (plus de 3 mois)
         Lent.objects.create(
             oeuvre=self.game_unpopular,
-            borrower="UserU",
-            date_in=now - timedelta(days=120), # Mardi (11 Aout -> 13 Avril environ)
-            date_out=now - timedelta(days=118)
+            borrower=self.user,
+            date_in=now - timedelta(days=119), # Mardi (17 semaines)
+            date_out=now - timedelta(days=117), # Jeudi
+            returned=True
         )
 
     def test_game_list_ordering(self):

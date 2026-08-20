@@ -1,11 +1,16 @@
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 from core.models import Game, GameType, Lent, Oeuvre, Book
 import datetime
+
+User = get_user_model()
 
 class GameViewsTest(TestCase):
     def setUp(self):
         self.client = Client()
+        self.user = User.objects.create_user(username="alice", first_name="Alice", last_name="Wonderland")
+        self.user2 = User.objects.create_user(username="bob", first_name="Bob", last_name="Builder")
         self.type = GameType.objects.create(name="Ambiance")
         self.game = Game.objects.create(
             title="Uno",
@@ -60,61 +65,179 @@ class GameViewsTest(TestCase):
         # Vérifie la présence de referrerpolicy
         self.assertContains(response, "referrerpolicy=\"strict-origin-when-cross-origin\"")
 
-    def test_reservation_list_view(self):
+    def test_reservation_list_unauthenticated_redirect(self):
+        response = self.client.get(reverse('reservation_list'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/google/login/', response.url)
+
+        # Vérifie qu'accéder directement en GET à /accounts/google/login/ redirige immédiatement vers Google OAuth (sans page intermédiaire)
+        login_response = self.client.get(response.url)
+        self.assertEqual(login_response.status_code, 302)
+        self.assertIn('accounts.google.com', login_response.url)
+
+    def test_reservation_list_view_authenticated(self):
+        self.client.force_login(self.user)
+        # Créer une résa pour alice et une pour bob
+        Lent.objects.create(
+            oeuvre=self.game,
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 8, 27)
+        )
+        game2 = Game.objects.create(title="Catan", difficulty=Game.DifficultyChoice.MEDIUM, weight_grams=500)
+        Lent.objects.create(
+            oeuvre=game2,
+            borrower=self.user2,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 8, 27)
+        )
+
         response = self.client.get(reverse('reservation_list'))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Uno")
+        self.assertNotContains(response, "Catan")
+
+    def test_reserve_game_unauthenticated_redirect(self):
+        response = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
+            'date_in': '2026-08-25',
+            'date_out': '2026-08-27'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/google/login/', response.url)
 
     def test_reserve_game_post_success(self):
-        # Lundi 10 au Vendredi 14 Août 2026
+        self.client.force_login(self.user)
+        # Mardi 25 au Jeudi 27 Août 2026
         response = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
-            'borrower': 'Alice',
-            'date_in': '2026-08-10',
-            'date_out': '2026-08-14'
+            'date_in': '2026-08-25',
+            'date_out': '2026-08-27'
         }, follow=True)
         self.assertEqual(response.status_code, 200) 
-        self.assertTrue(Lent.objects.filter(borrower='Alice').exists())
-        # Utilisation de html=True ou recherche d'une partie sans accent
-        self.assertContains(response, "Alice")
+        self.assertTrue(Lent.objects.filter(borrower=self.user).exists())
+        self.assertContains(response, "Alice Wonderland")
         self.assertContains(response, "nom de")
 
-    def test_reserve_game_overlap(self):
-        # Créer une première résa
-        lent = Lent.objects.create(
-            oeuvre=self.game,
-            borrower='Bob',
-            date_in=datetime.date(2026, 8, 10),
-            date_out=datetime.date(2026, 8, 14)
-        )
-        # Tenter un chevauchement
+    def test_reserve_game_missing_dates(self):
+        self.client.force_login(self.user)
+        # Soumission sans dates
         response = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
-            'borrower': 'Charlie',
-            'date_in': '2026-08-12',
-            'date_out': '2026-08-14'
+            'date_in': '',
+            'date_out': ''
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "dates")
-        self.assertFalse(Lent.objects.filter(borrower='Charlie').exists())
+        self.assertFalse(Lent.objects.filter(borrower=self.user).exists())
+        # Soumission avec seulement date_in
+        response2 = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
+            'date_in': '2026-08-25',
+            'date_out': ''
+        })
+        self.assertEqual(response2.status_code, 200)
+        self.assertFalse(Lent.objects.filter(borrower=self.user).exists())
+        # Soumission avec seulement date_out
+        response3 = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
+            'date_in': '',
+            'date_out': '2026-08-27'
+        })
+        self.assertEqual(response3.status_code, 200)
+        self.assertFalse(Lent.objects.filter(borrower=self.user).exists())
+
+    def test_reserve_game_page_submit_disabled(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="submit-btn"')
+        self.assertContains(response, 'disabled')
+
+    def test_reserve_game_overlap(self):
+        self.client.force_login(self.user)
+        # Créer une première résa (Mardi 25 Août au Mardi 1 Septembre)
+        lent = Lent.objects.create(
+            oeuvre=self.game,
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 9, 1)
+        )
+        # Tenter un chevauchement avec un autre utilisateur
+        self.client.force_login(self.user2)
+        response = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
+            'date_in': '2026-08-27',
+            'date_out': '2026-09-03'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Cette œuvre est déjà réservée pour ces dates.")
+        self.assertFalse(Lent.objects.filter(borrower=self.user2).exists())
 
     def test_reserve_game_too_long(self):
-        # Tenter une résa de plus de 15 jours
+        self.client.force_login(self.user)
+        # Tenter une résa de plus de 15 jours (Mardi 25 Août au Jeudi 10 Septembre = 16j)
         response = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
-            'borrower': 'Dave',
-            'date_in': '2026-08-10',
-            'date_out': '2026-08-30'
+            'date_in': '2026-08-25',
+            'date_out': '2026-09-10'
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "La durée de réservation ne peut pas dépasser 15 jours.")
-        self.assertFalse(Lent.objects.filter(borrower='Dave').exists())
+        self.assertFalse(Lent.objects.filter(borrower=self.user).exists())
 
-    def test_reserve_game_weekend(self):
-        # Samedi 15 Août 2026
+    def test_reserve_game_astreinte_days(self):
+        self.client.force_login(self.user)
+        # Vendredi 28 Août 2026 (pas un mardi ou jeudi)
         response = self.client.post(reverse('reserve_game', kwargs={'model_name': 'game', 'slug': self.game.slug}), {
-            'borrower': 'Eve',
-            'date_in': '2026-08-15',
-            'date_out': '2026-08-18'
+            'date_in': '2026-08-28',
+            'date_out': '2026-09-01'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "La date de début ne peut pas être un weekend.")
+        self.assertContains(response, "Vous ne pouvez selectionner que les mardi ou jeudi")
+
+    def test_cancel_reservation_success(self):
+        from unittest.mock import patch
+        self.client.force_login(self.user)
+        # Réservation future : Mardi 25 au Jeudi 27 Août 2026
+        lent = Lent.objects.create(
+            oeuvre=self.game,
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 8, 27)
+        )
+        # Date courante : 20 Août 2026 (non commencée)
+        mock_now = datetime.datetime(2026, 8, 20, 12, 0, 0, tzinfo=datetime.timezone.utc)
+        with patch('django.utils.timezone.now', return_value=mock_now):
+            response = self.client.post(reverse('cancel_reservation', kwargs={'pk': lent.pk}), follow=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(Lent.objects.filter(pk=lent.pk).exists())
+            self.assertContains(response, "Votre réservation a été annulée avec succès.")
+
+    def test_cancel_reservation_already_started(self):
+        from unittest.mock import patch
+        self.client.force_login(self.user)
+        mock_creation = datetime.datetime(2026, 8, 18, 12, 0, 0, tzinfo=datetime.timezone.utc)
+        with patch('django.utils.timezone.now', return_value=mock_creation):
+            # Réservation commencée : Mardi 18 au Jeudi 20 Août 2026
+            lent = Lent.objects.create(
+                oeuvre=self.game,
+                borrower=self.user,
+                date_in=datetime.date(2026, 8, 18),
+                date_out=datetime.date(2026, 8, 20),
+                returned=False
+            )
+        # Date courante : 20 Août 2026 (en cours/commencée)
+        mock_now = datetime.datetime(2026, 8, 20, 12, 0, 0, tzinfo=datetime.timezone.utc)
+        with patch('django.utils.timezone.now', return_value=mock_now):
+            response = self.client.post(reverse('cancel_reservation', kwargs={'pk': lent.pk}), follow=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(Lent.objects.filter(pk=lent.pk).exists())
+            self.assertContains(response, "Impossible d&#x27;annuler une réservation déjà commencée ou passée.")
+
+    def test_cancel_reservation_other_user_forbidden(self):
+        self.client.force_login(self.user2)
+        lent = Lent.objects.create(
+            oeuvre=self.game,
+            borrower=self.user,
+            date_in=datetime.date(2026, 8, 25),
+            date_out=datetime.date(2026, 8, 27)
+        )
+        response = self.client.post(reverse('cancel_reservation', kwargs={'pk': lent.pk}))
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Lent.objects.filter(pk=lent.pk).exists())
 
     def test_game_list_play_mode_filter(self):
         from core.models import PlayMode
@@ -152,18 +275,18 @@ class GameViewsTest(TestCase):
         
         # Date fixe pour le test : Mardi 11 Août 2026
         now = datetime.date(2026, 8, 11)
-        
-        # Ajouter des emprunts récents au jeu populaire
-        Lent.objects.create(
-            oeuvre=game_popular,
-            borrower="User1",
-            date_in=now - datetime.timedelta(days=7),
-            date_out=now - datetime.timedelta(days=5)
-        )
-        
-        # Mock timezone.now().date() utilisé dans la vue
         mock_now = datetime.datetime(2026, 8, 11, 12, 0, 0, tzinfo=datetime.timezone.utc)
+        
         with patch('django.utils.timezone.now', return_value=mock_now):
+            # Ajouter des emprunts récents au jeu populaire
+            Lent.objects.create(
+                oeuvre=game_popular,
+                borrower=self.user,
+                date_in=now - datetime.timedelta(days=7),
+                date_out=now - datetime.timedelta(days=5),
+                returned=True
+            )
+            
             response = self.client.get(reverse('game_list'))
             games = list(response.context['objects'])
             
@@ -185,17 +308,17 @@ class GameViewsTest(TestCase):
             difficulty=Game.DifficultyChoice.EASY,
             weight_grams=200
         )
-        today = datetime.date(2026, 8, 17)
-        Lent.objects.create(
-            oeuvre=game_reserved,
-            borrower="Bob",
-            date_in=today,
-            date_out=today + datetime.timedelta(days=2),
-            returned=False
-        )
+        today = datetime.date(2026, 8, 18) # Mardi
 
-        mock_now = datetime.datetime(2026, 8, 17, 12, 0, 0, tzinfo=datetime.timezone.utc)
+        mock_now = datetime.datetime(2026, 8, 18, 12, 0, 0, tzinfo=datetime.timezone.utc)
         with patch('django.utils.timezone.now', return_value=mock_now):
+            Lent.objects.create(
+                oeuvre=game_reserved,
+                borrower=self.user,
+                date_in=today,
+                date_out=today + datetime.timedelta(days=2),
+                returned=False
+            )
             # 1. Activation du mode site
             res = self.client.get(reverse('home') + "?site_mode=1")
             self.assertEqual(res.status_code, 200)

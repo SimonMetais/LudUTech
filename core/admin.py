@@ -63,7 +63,7 @@ class GameAdmin(OeuvreBaseAdmin):
 class LentAdmin(admin.ModelAdmin):
     list_display = ('oeuvre', 'borrower', 'date_in', 'date_out', 'returned', 'return_ok')
     list_filter = (ReturnAlertFilter, 'returned', 'date_in', 'date_out', 'oeuvre')
-    search_fields = ('borrower', 'oeuvre__title', 'details')
+    search_fields = ('borrower__username', 'borrower__first_name', 'borrower__last_name', 'borrower__email', 'oeuvre__title', 'details')
     ordering = ('returned', 'date_out')
     readonly_fields = ('oeuvre_details',)
 

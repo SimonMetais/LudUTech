@@ -5,6 +5,7 @@ urlpatterns = [
 
     # path('game/', views.game_list, name='test'),
     path('reservations/', views.reservation_list, name='reservation_list'),
+    path('reservations/<int:pk>/cancel/', views.cancel_reservation, name='cancel_reservation'),
     path('', views.home, name='home'),
     path('game-list-legacy/', views.oeuvre_list, {'model_name': 'game'}, name='game_list'),
     path('<str:model_name>/', views.oeuvre_list, name='oeuvre_list'),

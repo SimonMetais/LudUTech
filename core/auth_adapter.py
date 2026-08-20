@@ -1,11 +1,8 @@
-# myapp/adapters.py
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
 from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib import messages
-
-
 
 
 class DomainRestrictedSocialAccountAdapter(DefaultSocialAccountAdapter):
