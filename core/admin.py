@@ -54,8 +54,8 @@ class BookAdmin(OeuvreBaseAdmin):
 
 @admin.register(Game)
 class GameAdmin(OeuvreBaseAdmin):
-    list_display = OeuvreBaseAdmin.list_display + ('min_age', 'players_min', 'players_max', 'space')
-    list_filter = ('space', 'is_legacy', 'difficulty', 'game_types', 'play_modes', 'cabinet_color')
+    list_display = OeuvreBaseAdmin.list_display + ('min_age', 'players_min', 'players_max')
+    list_filter = ('is_legacy', 'difficulty', 'game_types', 'play_modes', 'cabinet_color')
     search_fields = ('title', 'short_description')
     filter_horizontal = ('game_types', 'play_modes')
 

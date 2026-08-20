@@ -14,11 +14,6 @@ class GameManager(OeuvreManager):
 
 
 class Game(Oeuvre):
-
-    class SpaceChoice(models.TextChoices):
-        INDOOR = "INDOOR", "Intérieur (Jeu de société)"
-        OUTDOOR = "OUTDOOR", "Extérieur"
-
     class DifficultyChoice(models.IntegerChoices):
         EASY = 1, "Facile"
         MEDIUM = 2, "Moyen"
@@ -36,12 +31,6 @@ class Game(Oeuvre):
     is_legacy = models.BooleanField(default=False, verbose_name="Legacy")
     video_youtube_id = models.CharField(max_length=20, blank=True, null=True, verbose_name="ID Vidéo YouTube")
     box_content = models.TextField(blank=True, verbose_name="Contenue de la boite")
-    space = models.CharField(
-        max_length=10,
-        choices=SpaceChoice.choices,
-        default=SpaceChoice.INDOOR,
-        verbose_name="Espace"
-    )
 
     objects = GameManager()
 

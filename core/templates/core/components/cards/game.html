@@ -9,9 +9,6 @@
                 </svg>
             </div>
         {% endif %}
-        <span class="absolute top-2 right-2 px-2 py-1 text-xs font-semibold rounded {% if object.space == 'INDOOR' %}bg-blue-100/90 text-blue-800{% else %}bg-green-100/90 text-green-800{% endif %}">
-            {{ object.get_space_display }}
-        </span>
     </div>
     <div class="p-6 flex flex-col flex-grow">
         <div class="flex items-center gap-2 mb-2">

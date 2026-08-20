@@ -8,7 +8,7 @@ from ..models import Oeuvre
 
 def home(request):
     latest_oeuvres = Oeuvre.objects.filter(
-        entry_date__gte=timezone.now().date() - timedelta(days=30)
+        entry_date__gte=timezone.now().date() - timedelta(days=60)
     ).order_by('-entry_date')
     return render(request, 'core/home.html', {
         'latest_oeuvres': latest_oeuvres,
