@@ -83,8 +83,6 @@ class Game(Oeuvre):
             games = games.filter(game_types__id=game_type)
         if difficulty := request.GET.get('difficulty'):
             games = games.filter(difficulty=difficulty)
-        if space := request.GET.get('space'):
-            games = games.filter(space=space)
         if play_mode := request.GET.get('play_mode'):
             games = games.filter(play_modes__id=play_mode)
         if (players := request.GET.get('players')) and players.isdigit():
@@ -96,6 +94,5 @@ class Game(Oeuvre):
             'game_types': apps.get_model('core', 'GameType').objects.all(),
             'play_modes': apps.get_model('core', 'PlayMode').objects.all(),
             'difficulty_choices': Game.DifficultyChoice.choices,
-            'space_choices': Game.SpaceChoice.choices,
         })
         return context
