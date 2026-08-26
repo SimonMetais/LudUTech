@@ -52,6 +52,20 @@
                     Disponibilité soumise à validation par l'équipe JDSU.
                 </p>
             </div>
+
+            <!-- Section Avis avec son propre conteneur scrollable -->
+            <div class="mt-8 pt-8 border-t border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Avis des membres</h2>
+                    <span class="text-xs text-gray-500 font-medium">Faites défiler pour voir la suite</span>
+                </div>
+
+                <!-- Boîte scrollable indépendante -->
+                <div id="reviews-list" 
+                     class="max-h-80 overflow-y-auto space-y-3 p-3 bg-gray-50/50 rounded-xl border border-gray-200">
+                    {% include 'core/partials/review_items.html' %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
