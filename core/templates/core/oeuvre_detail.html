@@ -3,7 +3,8 @@
 {% block title %}{{ object.title }} - JDSU{% endblock %}
 
 {% block content %}
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border overflow-hidden p-8" style="{% if site_mode and object.cabinet_color %}border: 4px solid {{ object.cabinet_color.color }};{% endif %}">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border overflow-hidden p-8"
+         style="border: 4px solid {% if site_mode and object.cabinet_color %}{{ object.cabinet_color.color }}{% else %}#FFFFFF{% endif %};">
         <div class="md:flex md:items-start gap-8 mb-8">
             <div class="md:w-1/2 bg-gray-50 flex items-center justify-center p-8 border rounded-lg">
                 {% if object.cover_image %}

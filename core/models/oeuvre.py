@@ -83,11 +83,19 @@ class Oeuvre(models.Model):
             f'core/components/cards/{self.content_type.model}.html',
             'core/components/cards/oeuvre.html'
         ]
-        return render_to_string(templates, {'object': self.downcast})
+        return render_to_string('core/card_core.html', {
+            'object': self.downcast,
+            'component_template': templates,
+            'site_mode': get_site_mode(),
+        })
 
     def render_card_simple(self):
         """ Rendu rapide utilisant uniquement la table Oeuvre (évite les N+1) """
-        return render_to_string('core/components/cards/oeuvre.html', {'object': self})
+        return render_to_string('core/card_core.html', {
+            'object': self,
+            'component_template': 'core/components/cards/oeuvre.html',
+            'site_mode': get_site_mode(),
+        })
 
     def render_detail(self):
         templates = [

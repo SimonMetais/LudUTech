@@ -1,0 +1,27 @@
+<a href="{{ object.get_absolute_url }}" class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-xl transition flex flex-col h-full group text-inherit no-underline"
+                                        style="border: 4px solid {% if site_mode and object.cabinet_color %}{{ object.cabinet_color.color }}{% else %}#FFFFFF{% endif %};">
+    <div class="relative p-4 pb-2 flex items-center justify-center min-w-0 min-h-[3.5rem]">
+        {% if object.rating %}
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs font-semibold rounded bg-yellow-100/90 text-yellow-800 shadow-sm flex-shrink-0">
+                {{ object.rating }} / 10
+            </span>
+        {% endif %}
+        <h3 class="w-full text-center font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition px-12 {% if object.title|length > 35 %}text-xs{% elif object.title|length > 24 %}text-sm{% elif object.title|length > 16 %}text-base{% elif object.title|length > 12 %}text-lg{% else %}text-xl{% endif %}" title="{{ object.title }}">
+            {{ object.title }}
+        </h3>
+    </div>
+    <div class="h-48 bg-white overflow-hidden relative flex-shrink-0">
+        {% if object.cover_image %}
+            <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="w-full h-full object-contain">
+        {% else %}
+            <div class="flex items-center justify-center h-full text-gray-400 bg-white">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+        {% endif %}
+    </div>
+    <div class="p-4 pt-3 flex flex-col flex-grow">
+        {% include component_template %}
+    </div>
+</a>
