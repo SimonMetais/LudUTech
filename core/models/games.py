@@ -48,17 +48,6 @@ class Game(Oeuvre):
             return None
         return f"https://www.youtube-nocookie.com/embed/{self.video_youtube_id}"
 
-    def save(self, *args, **kwargs):
-        # On nettoie tous les champs texte (strip).
-        for field in self._meta.fields:
-            if not isinstance(field, (models.CharField, models.TextField)):
-                continue
-            value = getattr(self, field.name)
-            if isinstance(value, str):
-                setattr(self, field.name, value.strip() or (None if field.unique else ""))
-
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.title
 

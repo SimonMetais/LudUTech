@@ -10,7 +10,7 @@ class PlayMode(models.Model):
 
     class Meta:
         verbose_name = "Mode de jeu"
-        verbose_name_plural = "Modes de jeu"
+        verbose_name_plural = "Jeux - mode"
 
     def __str__(self):
         if self.emoji:

@@ -7,7 +7,7 @@ class GameType(models.Model):
 
     class Meta:
         verbose_name = "Type de jeu"
-        verbose_name_plural = "Types de jeu"
+        verbose_name_plural = "Jeux - type"
 
     def __str__(self):
         return self.name

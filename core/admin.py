@@ -39,6 +39,7 @@ class CabinetColorAdmin(admin.ModelAdmin):
 
 class OeuvreBaseAdmin(admin.ModelAdmin):
     list_display = ('title', 'cabinet_color', 'barcode')
+    prepopulated_fields = {'slug': ('title',)}
 
 
 @admin.register(Oeuvre)
@@ -48,13 +49,11 @@ class OeuvreAdmin(OeuvreBaseAdmin):
 
 @admin.register(Book)
 class BookAdmin(OeuvreBaseAdmin):
-    list_display = OeuvreBaseAdmin.list_display + ('author', 'isbn', 'publisher')
     search_fields = ('title', 'author', 'isbn')
 
 
 @admin.register(Game)
 class GameAdmin(OeuvreBaseAdmin):
-    list_display = OeuvreBaseAdmin.list_display + ('min_age', 'players_min', 'players_max')
     list_filter = ('is_legacy', 'difficulty', 'game_types', 'play_modes', 'cabinet_color')
     search_fields = ('title', 'short_description')
     filter_horizontal = ('game_types', 'play_modes')
