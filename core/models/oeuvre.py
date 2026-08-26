@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.db import models
-from django.db.models import Avg, Q
+from django.db.models import Avg, Q, Case, When, Value, IntegerField
 from django.db.models.functions import Round, Cast
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
@@ -105,6 +105,35 @@ class Oeuvre(models.Model):
         templates = [
             f'core/components/details/{self.content_type.model}.html',
             'core/components/details/oeuvre.html'
+        ]
+        return render_to_string(templates, {'object': self.downcast})
+
+    @property
+    def current_lents(self):
+        """
+        Récupère directement en BDD les emprunts non rendus en cours ou en retard (exclut les emprunts futurs) :
+        1. Emprunt en cours (date_in <= today <= date_out) -> Priorité 0
+        2. Emprunt en retard (date_out < today)             -> Priorité 1 (trié par date_out)
+        """
+        today = timezone.now().date()
+        return (
+            self.lent_set.filter(returned=False, date_in__lte=today)
+            .select_related('borrower')
+            .annotate(
+                priority=Case(
+                    When(date_in__lte=today, date_out__gte=today, then=Value(0)),
+                    When(date_out__lt=today, then=Value(1)),
+                    default=Value(2),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by('priority', 'date_out', 'date_in')
+        )
+
+    def render_scan(self):
+        templates = [
+            f'core/components/scan/{self.content_type.model}.html',
+            'core/components/scan/oeuvre.html',
         ]
         return render_to_string(templates, {'object': self.downcast})
 

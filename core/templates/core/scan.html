@@ -1,0 +1,115 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Scan / Gestion Staff - JDSU{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Barre de recherche / Scan -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <form method="GET" action="{% url 'scan_view' %}" class="space-y-2">
+            <label for="barcode-input" class="block text-sm font-medium text-gray-700">
+                Scanner ou saisir un code-barres
+            </label>
+            <div class="flex gap-2">
+                <input type="text" id="barcode-input" name="barcode" value="{% if not error %}{{ barcode }}{% endif %}"
+                       placeholder="Scannez ici..." autofocus
+                       class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg px-4 py-2 border">
+                <button type="submit" class="px-5 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition cursor-pointer">
+                    Rechercher
+                </button>
+            </div>
+            {% if error %}
+                <p class="text-sm text-red-600 font-semibold mt-2">⚠️ {{ error }}</p>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Fiche Oeuvre trouvée -->
+    {% if oeuvre %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <div class="flex flex-col sm:flex-row gap-6">
+                <!-- Cover -->
+                <div class="w-full sm:w-48 flex-shrink-0">
+                    {% if oeuvre.cover_image %}
+                        <img src="{{ oeuvre.cover_image.url }}" alt="{{ oeuvre.title }}" class="w-full h-48 object-cover rounded-lg shadow">
+                    {% else %}
+                        <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                            Pas d'image
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Infos -->
+                <div class="flex-1 space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs uppercase tracking-wider font-semibold text-gray-500">{{ oeuvre.type_name }}</span>
+                            {% if oeuvre.cabinet_color %}
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-gray-900 border"
+                                      style="background-color: {{ oeuvre.cabinet_color.color }};">
+                                    {{ oeuvre.cabinet_color.name }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mt-1">{{ oeuvre.title }}</h2>
+                    </div>
+
+                    <!-- Bloc Statut Emprunt -->
+                    {% if lents %}
+                        <div class="space-y-3">
+                            {% for lent in lents %}
+                                <div class="p-4 rounded-lg border {% if lent.priority == 1 %}bg-red-50 border-red-200 text-red-900{% else %}bg-green-50 border-green-200 text-green-900{% endif %}">
+                                    <div class="flex justify-between items-start gap-4">
+                                        <div>
+                                            <div class="font-bold flex items-center gap-1.5">
+                                                {% if lent.priority == 1 %}
+                                                    <span>🔴 Emprunt EN RETARD</span>
+                                                {% else %}
+                                                    <span>🟢 Emprunt EN COURS (dans les délais)</span>
+                                                {% endif %}
+                                            </div>
+                                            <p class="text-sm mt-1">
+                                                Emprunteur : <span class="font-semibold">{{ lent.borrower.get_full_name|default:lent.borrower.username }}</span>
+                                            </p>
+                                            <p class="text-xs opacity-80">
+                                                Période : du {{ lent.date_in|date:"d/m/Y" }} au {{ lent.date_out|date:"d/m/Y" }}
+                                            </p>
+                                        </div>
+
+                                        <!-- Action Rendre -->
+                                        <form method="POST" action="{% url 'mark_lent_returned' lent.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="px-4 py-2 bg-white text-gray-800 font-semibold text-sm rounded-lg shadow border hover:bg-gray-50 transition cursor-pointer whitespace-nowrap">
+                                                Marquer comme rendu
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-sm font-medium">
+                            🟢 Disponible en rayon (aucun emprunt en cours)
+                        </div>
+                    {% endif %}
+
+                    <!-- Composant spécifique (ex: poids du jeu) -->
+                    {{ oeuvre.render_scan|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('barcode-input');
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    });
+</script>
+{% endblock %}
