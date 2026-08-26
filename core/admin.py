@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Game, Book, GameType, PlayMode, Lent, Oeuvre, CabinetColor
+from .models import Game, Book, GameType, PlayMode, Lent, Oeuvre, CabinetColor, Review
 
 class ReturnAlertFilter(admin.SimpleListFilter):
     title = 'Retour OK'
@@ -72,3 +72,10 @@ class LentAdmin(admin.ModelAdmin):
         if obj.oeuvre:
             return f"{obj.oeuvre.title} ({obj.oeuvre.content_type})"
         return "-"
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('oeuvre', 'rating', 'date', 'comment')
+    list_filter = ('rating', 'date', 'oeuvre')
+    search_fields = ('oeuvre__title', 'comment')

@@ -11,7 +11,3 @@ class Book(Oeuvre):
     class Meta:
         verbose_name = "Livre"
         verbose_name_plural = "Livres"
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('oeuvre_detail', kwargs={'model_name': 'book', 'slug': self.slug})

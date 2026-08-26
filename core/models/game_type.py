@@ -2,9 +2,7 @@ from django.db import models
 
 
 class GameType(models.Model):
-    """
-    Représente un type ou une catégorie de jeu (ex: Stratégie, Ambiance, Plein air).
-    """
+    """ Catégorie de jeu (ex: Stratégie, Ambiance). """
     name = models.CharField(max_length=100, verbose_name="Nom")
 
     class Meta:

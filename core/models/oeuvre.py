@@ -1,23 +1,25 @@
+from datetime import timedelta
 from django.db import models
+from django.db.models import Avg, Q
+from django.db.models.functions import Round, Cast
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 from django.template.loader import render_to_string
-
 from django.utils import timezone
 
 from core.middleware import get_site_mode
 
 
+
 class OeuvreManager(models.Manager):
     def get_queryset(self):
+        today = timezone.now().date()
         qs = super().get_queryset().select_related('content_type', 'cabinet_color')
         if get_site_mode():
-            today = timezone.now().date()
-            qs = qs.exclude(
-                lent__date_in__lte=today,
-                lent__date_out__gte=today,
-                lent__returned=False
-            )
+            qs = qs.exclude(lent__date_in__lte=today, lent__date_out__gte=today, lent__returned=False)
+        qs = qs.annotate(
+            rating=Cast(Round(Avg('reviews__rating')), output_field=models.IntegerField()),
+        )
         return qs
 
 

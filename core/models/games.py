@@ -59,10 +59,6 @@ class Game(Oeuvre):
 
         super().save(*args, **kwargs)
 
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('oeuvre_detail', kwargs={'model_name': 'game', 'slug': self.slug})
-
     def __str__(self):
         return self.title
 

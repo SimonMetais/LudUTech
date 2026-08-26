@@ -12,8 +12,7 @@ class GameModelTest(TestCase):
         self.game = Game.objects.create(
             title=" Test Game ",
             difficulty=Game.DifficultyChoice.MEDIUM,
-            weight_grams=1200,
-            space=Game.SpaceChoice.INDOOR
+            weight_grams=1200
         )
         self.game.game_types.add(self.type_str)
 
