@@ -16,11 +16,14 @@
         <div class="flex gap-8 items-start overflow-x-auto pb-6">
         {% for object in latest_oeuvres %}
             <div class="flex flex-col min-w-[20rem] max-w-[20rem] {% if forloop.first %}ml-12{% endif %} {% if forloop.last %}mr-12{% endif %}">
+                <div class="text-center mb-2">
+                    <span class="text-sm font-medium text-gray-600 capitalize">{{ object.type_name }}</span>
+                </div>
                 <div class="h-[22rem] flex flex-col">
                     {{ object.render_card_simple }} {# Sans _simple, appel SQL n+1 en cascade #}
                 </div>
                 {% if object.notes %}
-                    <div class="mt-2 flex justify-center">
+                    <div class="mt-4 flex justify-center">
                         <blockquote class="max-w-2xl rounded-xl border-l-4 border-indigo-600 bg-indigo-50 px-6 py-3 text-center shadow-sm">
                             <p class="text-lg italic leading-relaxed text-gray-800">“{{ object.notes }}”</p>
                         </blockquote>

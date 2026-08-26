@@ -6,9 +6,9 @@
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border overflow-hidden p-8"
          style="border: 4px solid {% if site_mode and object.cabinet_color %}{{ object.cabinet_color.color }}{% else %}#FFFFFF{% endif %};">
         <div class="md:flex md:items-start gap-8 mb-8">
-            <div class="md:w-1/2 bg-gray-50 flex items-center justify-center p-8 border rounded-lg">
+            <div class="md:w-1/2 bg-white flex items-center justify-center p-8">
                 {% if object.cover_image %}
-                    <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="max-w-full h-auto rounded-lg shadow-lg">
+                    <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="max-w-full h-auto">
                 {% else %}
                     <div class="text-gray-300">
                         <svg class="w-48 h-48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
