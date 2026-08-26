@@ -76,6 +76,6 @@ class LentAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('oeuvre', 'rating', 'date', 'comment')
-    list_filter = ('rating', 'date', 'oeuvre')
-    search_fields = ('oeuvre__title', 'comment')
+    list_display = ('oeuvre', 'user', 'rating', 'created_at', 'updated_at', 'comment')
+    list_filter = ('rating', 'created_at', 'updated_at', 'oeuvre')
+    search_fields = ('oeuvre__title', 'user__username', 'user__first_name', 'user__last_name', 'comment')

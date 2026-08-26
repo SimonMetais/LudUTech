@@ -1,11 +1,16 @@
 {% for review in reviews %}
     <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
         <div class="flex items-center justify-between mb-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
-                {{ review.rating }}/10
-            </span>
+            <div class="flex items-center space-x-2">
+                <span class="font-semibold text-sm text-gray-800">
+                    {{ review.user.get_full_name|default:review.user.username }}
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                    {{ review.rating }}/10
+                </span>
+            </div>
             <span class="text-xs text-gray-400">
-                {{ review.date|date:"d/m/Y" }}
+                {{ review.updated_at|date:"d/m/Y" }}
             </span>
         </div>
         {% if review.comment %}

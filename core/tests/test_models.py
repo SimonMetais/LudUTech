@@ -52,8 +52,8 @@ class LentModelTest(TestCase):
         lent = Lent(
             oeuvre=self.game,
             borrower=self.user,
-            date_in=datetime.date(2026, 8, 25), # Mardi
-            date_out=datetime.date(2026, 8, 20)  # Jeudi précédent
+            date_in=datetime.date(2030, 8, 20), # Mardi
+            date_out=datetime.date(2030, 8, 15)  # Jeudi précédent
         )
         with self.assertRaises(ValidationError):
             lent.full_clean()
@@ -63,30 +63,30 @@ class LentModelTest(TestCase):
         lent = Lent(
             oeuvre=self.game,
             borrower=self.user,
-            date_in=datetime.date(2026, 8, 25),  # Mardi
-            date_out=datetime.date(2026, 9, 10) # Jeudi (+16j)
+            date_in=datetime.date(2030, 8, 20),  # Mardi
+            date_out=datetime.date(2030, 9, 5) # Jeudi (+16j)
         )
         with self.assertRaises(ValidationError):
             lent.full_clean()
 
     def test_lent_validation_astreinte_days(self):
-        # Vendredi 28 Août 2026 (pas mardi ou jeudi)
+        # Vendredi 23 Août 2030 (pas mardi ou jeudi)
         lent = Lent(
             oeuvre=self.game,
             borrower=self.user,
-            date_in=datetime.date(2026, 8, 28),
-            date_out=datetime.date(2026, 9, 1)
+            date_in=datetime.date(2030, 8, 23),
+            date_out=datetime.date(2030, 8, 27)
         )
         with self.assertRaises(ValidationError):
             lent.full_clean()
 
     def test_valid_lent(self):
-        # Mardi 25 au Jeudi 27
+        # Mardi 20 au Jeudi 22
         lent = Lent(
             oeuvre=self.game,
             borrower=self.user,
-            date_in=datetime.date(2026, 8, 25),
-            date_out=datetime.date(2026, 8, 27)
+            date_in=datetime.date(2030, 8, 20),
+            date_out=datetime.date(2030, 8, 22)
         )
         try:
             lent.full_clean()

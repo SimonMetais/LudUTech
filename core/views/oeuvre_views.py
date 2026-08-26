@@ -42,15 +42,20 @@ def oeuvre_detail(request, model_name, slug):
     model_class = ct.model_class()
     obj = get_object_or_404(model_class.objects.all(), slug=slug)
 
-    paginator = Paginator(obj.reviews.all(), 10)
+    paginator = Paginator(obj.reviews.select_related('user').all(), 10)
     page_number = request.GET.get('page', 1)
     reviews_page = paginator.get_page(page_number)
+
+    user_review = None
+    if request.user.is_authenticated:
+        user_review = obj.reviews.filter(user=request.user).first()
 
     context = {
         'object': obj,
         'model_meta': model_class._meta,
         'model_name': model_name.lower(),
         'reviews': reviews_page,
+        'user_review': user_review,
     }
 
     if request.headers.get('HX-Request'):

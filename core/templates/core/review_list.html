@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mes avis - JDSU{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Mes avis</h1>
+    </div>
+
+    <div class="bg-white shadow-sm border rounded-xl overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commentaire</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modifié le</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for review in reviews %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ review.oeuvre.type_name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ review.oeuvre.get_absolute_url }}" class="text-indigo-600 font-semibold hover:text-indigo-900">
+                            {{ review.oeuvre.title }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                            {{ review.rating }} / 10 ⭐
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="{{ review.comment }}">
+                        {{ review.comment|default:"-" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ review.updated_at|date:"d/m/Y" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                        <a href="{% url 'review_oeuvre' model_name=review.oeuvre.content_type.model slug=review.oeuvre.slug %}" class="text-indigo-600 hover:text-indigo-900 font-medium hover:underline">
+                            Modifier
+                        </a>
+                        <form method="post" action="{% url 'delete_review' review.pk %}" class="inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avis ?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'review_list' %}">
+                            <button type="submit" class="text-red-600 hover:text-red-900 font-medium hover:underline cursor-pointer">
+                                Supprimer
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        Vous n'avez rédigé aucun avis pour le moment.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

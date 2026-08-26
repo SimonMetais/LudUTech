@@ -78,6 +78,10 @@ class Oeuvre(models.Model):
     def type_name(self):
         return self.content_type.name
 
+    @property
+    def type_name_plural(self):
+        return self.downcast._meta.verbose_name_plural
+
     def render_card(self):
         templates = [
             f'core/components/cards/{self.content_type.model}.html',

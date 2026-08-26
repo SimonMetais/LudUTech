@@ -11,7 +11,7 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <nav class="flex mb-8 text-sm text-gray-500">
-        <a href="{% url 'oeuvre_list' model_name=model_name %}" class="hover:text-indigo-600">{{ oeuvre.type_name }}s</a>
+        <a href="{% url 'oeuvre_list' model_name=model_name %}" class="hover:text-indigo-600">{{ oeuvre.type_name_plural }}</a>
         <span class="mx-2">/</span>
         <a href="{{ oeuvre.get_absolute_url }}" class="hover:text-indigo-600">{{ oeuvre.title }}</a>
         <span class="mx-2">/</span>

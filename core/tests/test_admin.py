@@ -19,8 +19,8 @@ class LentAdminTest(TestCase):
         self.lent = Lent.objects.create(
             oeuvre=self.game,
             borrower=self.user,
-            date_in=datetime.date(2026, 8, 25),
-            date_out=datetime.date(2026, 8, 27)
+            date_in=datetime.date(2030, 8, 20),
+            date_out=datetime.date(2030, 8, 22)
         )
         self.admin = LentAdmin(Lent, self.site)
 
