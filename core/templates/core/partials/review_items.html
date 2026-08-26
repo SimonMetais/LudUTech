@@ -1,0 +1,25 @@
+{% for review in reviews %}
+    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+        <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                {{ review.rating }}/10
+            </span>
+            <span class="text-xs text-gray-400">
+                {{ review.date|date:"d/m/Y" }}
+            </span>
+        </div>
+        {% if review.comment %}
+            <p class="text-sm text-gray-700 leading-relaxed">{{ review.comment }}</p>
+        {% endif %}
+    </div>
+
+    {% if reviews.has_next and forloop.last %}
+        <span hx-get="{{ object.get_absolute_url }}?page={{ reviews.next_page_number }}"
+              hx-trigger="intersect once"
+              hx-target="this"
+              hx-swap="outerHTML">
+        </span>
+    {% endif %}
+{% empty %}
+    <p class="text-sm text-gray-500 italic p-4 text-center">Aucun avis pour le moment.</p>
+{% endfor %}
