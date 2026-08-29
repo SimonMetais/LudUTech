@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.utils import timezone
 from core.models import Oeuvre, Lent
 
 
@@ -36,8 +37,8 @@ def scan_view(request, barcode=None):
 def mark_lent_returned(request, pk):
     lent = get_object_or_404(Lent, pk=pk)
     oeuvre_title = lent.oeuvre.title
-    lent.returned = True
-    lent.save(update_fields=['returned'])
+    lent.date_returned = timezone.now().date()
+    lent.save(update_fields=['date_returned'])
 
     messages.success(request, f"L'œuvre « {oeuvre_title} » a bien été marquée comme rendue.")
     return redirect('scan_view')

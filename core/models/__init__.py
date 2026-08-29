@@ -5,3 +5,4 @@ from .game_type import GameType
 from .play_mode import PlayMode
 from .lent import Lent
 from .review import Review
+from . import user_extensions

@@ -47,6 +47,6 @@ def reserve_oeuvre(request, model_name, slug):
         'oeuvre': oeuvre,
         'form': form,
         'existing_lents': Lent.objects.filter(oeuvre=oeuvre),
-        'already_lents': Lent.objects.filter(oeuvre=oeuvre, returned=False, borrower=request.user),
+        'already_lents': Lent.objects.filter(oeuvre=oeuvre, date_returned__isnull=True, borrower=request.user),
         'model_name': model_name,
     })

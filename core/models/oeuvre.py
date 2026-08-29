@@ -16,7 +16,7 @@ class OeuvreManager(models.Manager):
         today = timezone.now().date()
         qs = super().get_queryset().select_related('content_type', 'cabinet_color')
         if get_site_mode():
-            qs = qs.exclude(lent__date_in__lte=today, lent__date_out__gte=today, lent__returned=False)
+            qs = qs.exclude(lent__date_in__lte=today, lent__date_out__gte=today, lent__date_returned__isnull=True)
         qs = qs.annotate(
             rating=Cast(Round(Avg('reviews__rating')), output_field=models.IntegerField()),
         )
@@ -117,7 +117,7 @@ class Oeuvre(models.Model):
         """
         today = timezone.now().date()
         return (
-            self.lent_set.filter(returned=False, date_in__lte=today)
+            self.lent_set.filter(date_returned__isnull=True, date_in__lte=today)
             .select_related('borrower')
             .annotate(
                 priority=Case(

@@ -66,11 +66,12 @@
                                                 {% if lent.priority == 1 %}
                                                     <span>🔴 Emprunt EN RETARD</span>
                                                 {% else %}
-                                                    <span>🟢 Emprunt EN COURS (dans les délais)</span>
+                                                    <span>🟢 Emprunt EN COURS</span>
                                                 {% endif %}
                                             </div>
-                                            <p class="text-sm mt-1">
-                                                Emprunteur : <span class="font-semibold">{{ lent.borrower.get_full_name|default:lent.borrower.username }}</span>
+                                            <p class="text-sm mt-1 flex items-center flex-wrap gap-2">
+                                                <span>Emprunteur : <span class="font-semibold">{{ lent.borrower.get_full_name|default:lent.borrower.username }}</span></span>
+                                                {{ lent.borrower.lent_status_badge }}
                                             </p>
                                             <p class="text-xs opacity-80">
                                                 Période : du {{ lent.date_in|date:"d/m/Y" }} au {{ lent.date_out|date:"d/m/Y" }}

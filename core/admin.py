@@ -1,6 +1,12 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils import timezone
+from django.utils.html import format_html
 from .models import Game, Book, GameType, PlayMode, Lent, Oeuvre, CabinetColor, Review
+
+User = get_user_model()
+
 
 class ReturnAlertFilter(admin.SimpleListFilter):
     title = 'Retour OK'
@@ -15,10 +21,48 @@ class ReturnAlertFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         today = timezone.now().date()
         if self.value() == 'yes':
-            return queryset.exclude(returned=False, date_out__lte=today)
+            return queryset.exclude(date_returned__isnull=True, date_out__lte=today)
         if self.value() == 'no':
-            return queryset.filter(returned=False, date_out__lte=today)
+            return queryset.filter(date_returned__isnull=True, date_out__lte=today)
         return queryset
+
+
+class UserLentInline(admin.TabularInline):
+    model = Lent
+    extra = 0
+    fields = ('oeuvre', 'date_in', 'date_out', 'date_returned', 'status')
+    readonly_fields = ('oeuvre', 'date_in', 'date_out', 'date_returned', 'status')
+    can_delete = False
+    show_change_link = True
+    ordering = ('-date_in',)
+
+
+if admin.site.is_registered(User):
+    admin.site.unregister(User)
+
+
+@admin.register(User)
+class CustomUserAdmin(BaseUserAdmin):
+    inlines = list(BaseUserAdmin.inlines) + [UserLentInline]
+    list_display = BaseUserAdmin.list_display + ('lent_status_badge',)
+    readonly_fields = BaseUserAdmin.readonly_fields + ('lent_status_summary',)
+
+    @admin.display(description="État emprunts")
+    def lent_status_badge(self, obj):
+        return obj.lent_status_badge
+
+    @admin.display(description="Statistiques d'emprunt")
+    def lent_status_summary(self, obj):
+        return obj.lent_status_badge
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj:
+            fieldsets = fieldsets + (
+                ("Historique & Fiabilité", {"fields": ("lent_status_summary",)}),
+            )
+        return fieldsets
+
 
 @admin.register(GameType)
 class GameTypeAdmin(admin.ModelAdmin):
@@ -60,11 +104,11 @@ class GameAdmin(OeuvreBaseAdmin):
 
 @admin.register(Lent)
 class LentAdmin(admin.ModelAdmin):
-    list_display = ('oeuvre', 'borrower', 'date_in', 'date_out', 'returned', 'return_ok')
-    list_filter = (ReturnAlertFilter, 'returned', 'date_in', 'date_out', 'oeuvre')
+    list_display = ('oeuvre', 'borrower', 'date_in', 'date_out', 'date_returned', 'status', 'return_ok')
+    list_filter = (ReturnAlertFilter, 'status', 'date_in', 'date_out', 'oeuvre')
     search_fields = ('borrower__username', 'borrower__first_name', 'borrower__last_name', 'borrower__email', 'oeuvre__title', 'details')
-    ordering = ('returned', 'date_out')
-    readonly_fields = ('oeuvre_details',)
+    ordering = ('date_returned', 'date_out')
+    readonly_fields = ('oeuvre_details', 'status')
 
     @admin.display(description="Détails de l'oeuvre")
     def oeuvre_details(self, obj):
