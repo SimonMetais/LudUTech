@@ -1,41 +1,28 @@
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 
 def get_user_lent_stats(self):
-    """
-    Retourne les statistiques de ponctualité d'emprunt pour l'utilisateur.
-    """
+    """ Retourne les statistiques de ponctualité d'emprunt pour l'utilisateur. """
     from core.models.lent import Lent
 
-    today = timezone.now().date()
-    # Exclut les emprunts annulés
-    lents_qs = self.lents.exclude(status=Lent.Status.CANCELLED)
+    lents_qs = self.lents
     total = lents_qs.count()
     if total == 0:
         return {"total": 0, "late_count": 0, "late_rate": 0, "has_late": False}
 
-    late_count = lents_qs.filter(
-        models.Q(status=Lent.Status.LATE) |
-        models.Q(date_returned__isnull=True, date_out__lt=today)
-    ).count()
-
-    late_rate = round((late_count / total) * 100)
+    late_count = lents_qs.filter(status__in=[Lent.Status.RETURNED_LATE, Lent.Status.HANDED_LATE]).count()
     return {
         "total": total,
         "late_count": late_count,
-        "late_rate": late_rate,
+        "late_rate": round((late_count / total) * 100),
         "has_late": late_count > 0,
     }
 
 
 def get_user_lent_badge(self):
-    """
-    Retourne le badge HTML stylisé représentant l'état et les statistiques d'emprunts de l'utilisateur.
-    """
+    """ Retourne le badge HTML stylisé représentant l'état et les statistiques d'emprunts de l'utilisateur. """
     stats = self.lent_stats
     if stats["total"] == 0:
         return mark_safe(

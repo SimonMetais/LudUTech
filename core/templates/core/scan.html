@@ -59,15 +59,13 @@
                     {% if lents %}
                         <div class="space-y-3">
                             {% for lent in lents %}
-                                <div class="p-4 rounded-lg border {% if lent.priority == 1 %}bg-red-50 border-red-200 text-red-900{% else %}bg-green-50 border-green-200 text-green-900{% endif %}">
+                                <div class="p-4 rounded-lg border {% if 'en retard' in lent.status %}bg-red-50 border-red-200 text-red-900{% else %}bg-green-50 border-green-200 text-green-900{% endif %}">
                                     <div class="flex justify-between items-start gap-4">
                                         <div>
                                             <div class="font-bold flex items-center gap-1.5">
-                                                {% if lent.priority == 1 %}
-                                                    <span>🔴 Emprunt EN RETARD</span>
-                                                {% else %}
-                                                    <span>🟢 Emprunt EN COURS</span>
-                                                {% endif %}
+                                                <span>{% if 'en retard' in lent.status %}🔴
+                                                {% elif "aujourd'hui" in lent.status %}🟢
+                                                {% else %}🟠{% endif %} {{ lent.status }}</span>
                                             </div>
                                             <p class="text-sm mt-1 flex items-center flex-wrap gap-2">
                                                 <span>Emprunteur : <span class="font-semibold">{{ lent.borrower.get_full_name|default:lent.borrower.username }}</span></span>

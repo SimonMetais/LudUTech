@@ -110,25 +110,11 @@ class Oeuvre(models.Model):
 
     @property
     def current_lents(self):
-        """
-        Récupère directement en BDD les emprunts non rendus en cours ou en retard (exclut les emprunts futurs) :
-        1. Emprunt en cours (date_in <= today <= date_out) -> Priorité 0
-        2. Emprunt en retard (date_out < today)             -> Priorité 1 (trié par date_out)
-        """
-        today = timezone.now().date()
-        return (
-            self.lent_set.filter(date_returned__isnull=True, date_in__lte=today)
-            .select_related('borrower')
-            .annotate(
-                priority=Case(
-                    When(date_in__lte=today, date_out__gte=today, then=Value(0)),
-                    When(date_out__lt=today, then=Value(1)),
-                    default=Value(2),
-                    output_field=IntegerField(),
-                )
-            )
-            .order_by('priority', 'date_out', 'date_in')
-        )
+        """ Récupère directement en BDD les emprunts non rendus en cours (exclut les emprunts futurs) """
+        return self.lents.filter(
+            date_returned__isnull=True,
+            date_in__lte=timezone.now().date()
+        ).select_related('borrower')
 
     def render_scan(self):
         templates = [

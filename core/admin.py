@@ -2,39 +2,23 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils import timezone
-from django.utils.html import format_html
 from .models import Game, Book, GameType, PlayMode, Lent, Oeuvre, CabinetColor, Review
 
 User = get_user_model()
 
 
-class ReturnAlertFilter(admin.SimpleListFilter):
-    title = 'Retour OK'
-    parameter_name = 'return_ok'
-
-    def lookups(self, request, model_admin):
-        return (
-            ('yes', 'Oui'),
-            ('no', 'Non'),
-        )
-
-    def queryset(self, request, queryset):
-        today = timezone.now().date()
-        if self.value() == 'yes':
-            return queryset.exclude(date_returned__isnull=True, date_out__lte=today)
-        if self.value() == 'no':
-            return queryset.filter(date_returned__isnull=True, date_out__lte=today)
-        return queryset
-
-
 class UserLentInline(admin.TabularInline):
     model = Lent
     extra = 0
-    fields = ('oeuvre', 'date_in', 'date_out', 'date_returned', 'status')
-    readonly_fields = ('oeuvre', 'date_in', 'date_out', 'date_returned', 'status')
+    fields = ('oeuvre', 'date_in', 'date_out', 'date_returned', 'display_status')
+    readonly_fields = ('oeuvre', 'date_in', 'date_out', 'date_returned', 'display_status')
     can_delete = False
     show_change_link = True
     ordering = ('-date_in',)
+
+    @admin.display(description="Statut", ordering="status")
+    def display_status(self, obj):
+        return obj.status
 
 
 if admin.site.is_registered(User):
@@ -104,11 +88,15 @@ class GameAdmin(OeuvreBaseAdmin):
 
 @admin.register(Lent)
 class LentAdmin(admin.ModelAdmin):
-    list_display = ('oeuvre', 'borrower', 'date_in', 'date_out', 'date_returned', 'status', 'return_ok')
-    list_filter = (ReturnAlertFilter, 'status', 'date_in', 'date_out', 'oeuvre')
+    list_display = ('oeuvre', 'borrower', 'date_in', 'date_out', 'date_returned', 'display_status')
+    list_filter = ('date_in', 'date_out', 'oeuvre')
     search_fields = ('borrower__username', 'borrower__first_name', 'borrower__last_name', 'borrower__email', 'oeuvre__title', 'details')
     ordering = ('date_returned', 'date_out')
-    readonly_fields = ('oeuvre_details', 'status')
+    readonly_fields = ('oeuvre_details', 'display_status')
+
+    @admin.display(description="Statut", ordering="status")
+    def display_status(self, obj):
+        return obj.status
 
     @admin.display(description="Détails de l'oeuvre")
     def oeuvre_details(self, obj):
